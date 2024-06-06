@@ -5,28 +5,28 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	TDAHeap "tdas/cola_prioridad"
+	TDADiccionario "tdas/diccionario"
 	TDALista "tdas/lista"
-	TDAAbb "tdas/pruebaAbb"
-	TDAHash "tdas/pruebaHash"
 	"time"
 )
 
 var compararVisitantes func(Ip, Ip) int = CompararIps
 
 type datosServidor struct {
-	visitantes TDAAbb.DiccionarioOrdenado[Ip, bool]
-	recursos   TDAHash.Diccionario[string, int]
+	visitantes TDADiccionario.DiccionarioOrdenado[Ip, bool]
+	recursos   TDADiccionario.Diccionario[string, int]
 }
 
 func GenerarDatos() AnalisisLog {
 
-	return &datosServidor{TDAAbb.CrearABB[Ip, bool](compararVisitantes), TDAHash.CrearHash[string, int]()}
+	return &datosServidor{TDADiccionario.CrearABB[Ip, bool](compararVisitantes), TDADiccionario.CrearHash[string, int]()}
 }
 
 func (servidor *datosServidor) CargarArchivo(archivoLog string) (informe string) {
 
-	conexionesLogActual := TDAHash.CrearHash[Ip, TDALista.Lista[time.Time]]()
-	ipSospechosas := TDAAbb.CrearABB[Ip, bool](compararVisitantes)
+	conexionesLogActual := TDADiccionario.CrearHash[Ip, TDALista.Lista[time.Time]]()
+	ipSospechosas := TDADiccionario.CrearABB[Ip, bool](compararVisitantes)
 
 	archivo, _ := os.Open(archivoLog)
 
@@ -44,7 +44,48 @@ func (servidor *datosServidor) CargarArchivo(archivoLog string) (informe string)
 
 }
 
-func obtenerInforme(ipSospechosas TDAAbb.Diccionario[Ip, bool]) string {
+type parRecursoVisitas struct {
+	recurso string
+	visitas int
+}
+
+func (servidor *datosServidor) VerMasVisitados(n int) {
+
+	masVisitados := TDAHeap.CrearHeap(func(recurso1 parRecursoVisitas, recurso2 parRecursoVisitas) int {
+		return recurso2.visitas - recurso1.visitas
+	})
+
+	añadirNMasVisitasActual := func(recurso string, visitas int) bool {
+
+		if masVisitados.Cantidad() >= n {
+			masVisitados.Desencolar()
+		}
+
+		masVisitados.Encolar(parRecursoVisitas{recurso, visitas})
+		return true
+	}
+
+	servidor.recursos.Iterar(añadirNMasVisitasActual)
+
+	print("Sitios mas visitados:\n")
+
+	mostrarMasVisitados(masVisitados)
+}
+
+func mostrarMasVisitados(masVisitados TDAHeap.ColaPrioridad[parRecursoVisitas]) {
+
+	if masVisitados.Cantidad() == 0 {
+		return
+	}
+
+	menosVisitado := masVisitados.Desencolar()
+
+	mostrarMasVisitados(masVisitados)
+
+	fmt.Printf("\t%s - %d\n", menosVisitado.recurso, menosVisitado.visitas)
+}
+
+func obtenerInforme(ipSospechosas TDADiccionario.Diccionario[Ip, bool]) string {
 
 	informeIpSospechosas := make([]string, 0)
 
@@ -58,7 +99,7 @@ func obtenerInforme(ipSospechosas TDAAbb.Diccionario[Ip, bool]) string {
 
 }
 
-func (servidor *datosServidor) cargarNuevaConexion(infoConexion string, conexionesLogActual TDAHash.Diccionario[Ip, TDALista.Lista[time.Time]]) (ipConexion Ip, esSospechosaDeDos bool) {
+func (servidor *datosServidor) cargarNuevaConexion(infoConexion string, conexionesLogActual TDADiccionario.Diccionario[Ip, TDALista.Lista[time.Time]]) (ipConexion Ip, esSospechosaDeDos bool) {
 
 	datosLog := strings.Fields(infoConexion)
 

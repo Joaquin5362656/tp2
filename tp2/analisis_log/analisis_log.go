@@ -5,5 +5,5 @@ type AnalisisLog interface {
 
 	//	Visitantes(desde Ip, hasta Ip)
 
-	// VerMasVisitados(n int)
+	VerMasVisitados(n int)
 }

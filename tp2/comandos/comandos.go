@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	Analisis "tp2/tp2/analisis_log"
 )
@@ -44,7 +45,7 @@ func (lectura ComandosLog) EsComandoValido() (esValido bool, informeError string
 			esValido = true
 		}
 	case comando3:
-		if len(lectura.obtenerParametros()) == 2 {
+		if len(lectura.obtenerParametros()) == 1 {
 			esValido = true
 		}
 	default:
@@ -66,13 +67,15 @@ func existeArchivoLog(archivo string) bool {
 	return true
 }
 
-func (lectura ComandosLog) EjecutarComando() {
+func (lectura ComandosLog) EjecutarComando(infoServidor Analisis.AnalisisLog) {
 
 	switch lectura.obtenerComando() {
 	case comando1:
-		analisisLog := Analisis.GenerarDatos()
-		informeAnalisis := analisisLog.CargarArchivo(lectura.obtenerParametros()[0])
+		informeAnalisis := infoServidor.CargarArchivo(lectura.obtenerParametros()[0])
 		fmt.Print(informeAnalisis)
+	case comando3:
+		numeroMasVisitados, _ := strconv.Atoi(lectura.obtenerParametros()[0])
+		infoServidor.VerMasVisitados(numeroMasVisitados)
 	default:
 		break
 	}
