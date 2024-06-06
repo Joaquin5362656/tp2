@@ -1,7 +1,8 @@
-package tp2
+package main
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	Analisis "tp2/tp2/analisis_log"
 	LecturaComandos "tp2/tp2/comandos"
@@ -19,12 +20,14 @@ func main() {
 
 		comando := LecturaComandos.CargarComando(lectura)
 
-		comandoValido, informeError := comando.EsComandoValido()
+		var informeError string
+
+		comandoValido, informeError = comando.EsComandoValido()
 
 		if comandoValido {
 			comando.EjecutarComando(analisisLogs)
 		} else {
-			print(informeError)
+			fmt.Fprintf(os.Stderr, "%s", informeError)
 		}
 	}
 
