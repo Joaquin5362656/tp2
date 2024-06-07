@@ -59,7 +59,7 @@ func (servidor *datosServidor) CargarArchivo(archivoLog string) (informe string)
 
 func (servidor *datosServidor) Visitantes(desde Ip, hasta Ip) {
 
-	print("Visitantes:\n")
+	fmt.Printf("Visitantes:\n")
 
 	servidor.visitantes.IterarRango(&desde, &hasta, func(actual Ip, dato bool) bool {
 		fmt.Printf("\t%s\n", ObtenerStringDeIp(actual))
@@ -89,7 +89,7 @@ func (servidor *datosServidor) VerMasVisitados(n int) {
 
 	servidor.recursos.Iterar(añadirNMasVisitasActual)
 
-	print("Sitios más visitados:\n")
+	fmt.Printf("Sitios más visitados:\n")
 
 	mostrarMasVisitados(masVisitados)
 }
