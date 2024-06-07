@@ -23,9 +23,17 @@ type datosServidor struct {
 	recursos   TDADiccionario.Diccionario[string, int]
 }
 
-func GenerarDatos() AnalisisLog {
+type parRecursoVisitas struct {
+	recurso string
+	visitas int
+}
 
-	return &datosServidor{TDADiccionario.CrearABB[Ip, bool](compararVisitantes), TDADiccionario.CrearHash[string, int]()}
+func GenerarRegistros() AnalisisLog {
+
+	return &datosServidor{
+		visitantes: TDADiccionario.CrearABB[Ip, bool](compararVisitantes),
+		recursos:   TDADiccionario.CrearHash[string, int](),
+	}
 }
 
 func (servidor *datosServidor) CargarArchivo(archivoLog string) (informe string) {
@@ -49,9 +57,14 @@ func (servidor *datosServidor) CargarArchivo(archivoLog string) (informe string)
 
 }
 
-type parRecursoVisitas struct {
-	recurso string
-	visitas int
+func (servidor *datosServidor) Visitantes(desde Ip, hasta Ip) {
+
+	print("Visitantes:\n")
+
+	servidor.visitantes.IterarRango(&desde, &hasta, func(actual Ip, dato bool) bool {
+		fmt.Printf("\t%s\n", ObtenerStringDeIp(actual))
+		return true
+	})
 }
 
 func (servidor *datosServidor) VerMasVisitados(n int) {
@@ -63,7 +76,11 @@ func (servidor *datosServidor) VerMasVisitados(n int) {
 	añadirNMasVisitasActual := func(recurso string, visitas int) bool {
 
 		if masVisitados.Cantidad() >= n {
-			masVisitados.Desencolar()
+			if visitas > masVisitados.VerMax().visitas {
+				masVisitados.Desencolar()
+			} else {
+				return true
+			}
 		}
 
 		masVisitados.Encolar(parRecursoVisitas{recurso, visitas})
@@ -72,7 +89,7 @@ func (servidor *datosServidor) VerMasVisitados(n int) {
 
 	servidor.recursos.Iterar(añadirNMasVisitasActual)
 
-	print("Sitios mas visitados:\n")
+	print("Sitios más visitados:\n")
 
 	mostrarMasVisitados(masVisitados)
 }

@@ -14,7 +14,7 @@ func main() {
 
 	comandoValido := true
 
-	analisisLogs := Analisis.GenerarDatos()
+	analisisLogs := Analisis.GenerarRegistros()
 
 	for comandoValido && lectura.Scan() {
 

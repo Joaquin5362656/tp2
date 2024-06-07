@@ -73,6 +73,10 @@ func (lectura ComandosLog) EjecutarComando(infoServidor Analisis.AnalisisLog) {
 	case comando1:
 		informeAnalisis := infoServidor.CargarArchivo(lectura.obtenerParametros()[0])
 		fmt.Print(informeAnalisis)
+	case comando2:
+		desde := lectura.obtenerParametros()[0]
+		hasta := lectura.obtenerParametros()[1]
+		infoServidor.Visitantes(Analisis.ObtenerIpDeString(desde), Analisis.ObtenerIpDeString(hasta))
 	case comando3:
 		numeroMasVisitados, _ := strconv.Atoi(lectura.obtenerParametros()[0])
 		infoServidor.VerMasVisitados(numeroMasVisitados)
