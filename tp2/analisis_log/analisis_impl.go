@@ -11,6 +11,11 @@ import (
 	"time"
 )
 
+const (
+	_MaximasConexionesDoS     = 5
+	_TiempoEntreConexionesDoS = 2
+)
+
 var compararVisitantes func(Ip, Ip) int = CompararIps
 
 type datosServidor struct {
@@ -132,14 +137,14 @@ func (servidor *datosServidor) cargarNuevaConexion(infoConexion string, conexion
 
 func seDetectoDoS(ultimasConexiones TDALista.Lista[time.Time], horarioConexion time.Time) (esSospechosaDeDoS bool) {
 
-	if ultimasConexiones.Largo() == 5 {
+	if ultimasConexiones.Largo() == _MaximasConexionesDoS {
 		return true
 	}
 
-	if ultimasConexiones.Largo() == 4 {
+	if ultimasConexiones.Largo() == _MaximasConexionesDoS-1 {
 		diferenciaDeTiempo := horarioConexion.Sub(ultimasConexiones.VerPrimero())
 
-		if diferenciaDeTiempo.Seconds() >= 2 {
+		if diferenciaDeTiempo.Seconds() >= _TiempoEntreConexionesDoS {
 			ultimasConexiones.BorrarPrimero()
 		} else {
 			esSospechosaDeDoS = true
